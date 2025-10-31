@@ -1,0 +1,47 @@
+name: Create Release Branch and Bump Version
+
+on:
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch full history
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and push release branch
+        run: |
+          git branch release
+          git push origin release
+
+      - name: Switch back to main and bump version
+        run: |
+          # Bump minor version
+          npm version minor --no-git-tag-version
+
+          # Get the new version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: $NEW_VERSION"
+
+          # Commit the version bump
+          git add package.json
+          git add package-lock.json
+          git commit -m "Bump version to $NEW_VERSION"
+
+          # Push the changes
+          git push origin main
