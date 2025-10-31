@@ -85,7 +85,7 @@ jobs:
 
           # Commit the version change
           git add package.json package-lock.json
-          git commit -m "Create release candidate v$RC_VERSION"
+          git commit -m "chore: :bookmark: Create release candidate v$RC_VERSION"
 
           # Create and push tag
           git tag "v$RC_VERSION"

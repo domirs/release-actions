@@ -41,7 +41,7 @@ jobs:
           # Commit the version bump
           git add package.json
           git add package-lock.json
-          git commit -m "Bump version to $NEW_VERSION"
+          git commit -m "chore: :bookmark: Bump version to $NEW_VERSION"
 
           # Push the changes
           git push origin main
