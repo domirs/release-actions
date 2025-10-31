@@ -78,7 +78,7 @@ jobs:
           git tag "v$RC_VERSION"
           git push origin "v$RC_VERSION"
 
-          # Push the commit
-          git push origin main
+          # Push the commit to current branch
+          git push origin HEAD
 
           echo "Created and pushed RC version: v$RC_VERSION"
