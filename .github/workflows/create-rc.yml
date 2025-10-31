@@ -1,0 +1,84 @@
+name: Create Release Candidate
+
+on:
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  contents: write
+
+jobs:
+  create-rc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Fetch full history including tags
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "lts/*"
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine RC version
+        id: rc-version
+        run: |
+          # Get the current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Remove any existing pre-release suffix to get base version
+          BASE_VERSION=$(echo $CURRENT_VERSION | sed 's/-.*$//')
+          echo "Base version: $BASE_VERSION"
+          
+          # Get all RC tags for this base version, sorted by RC number
+          RC_TAGS=$(git tag -l | grep "^v${BASE_VERSION}-rc\." | sort -V)
+          echo "Existing RC tags: $RC_TAGS"
+          
+          # Find the highest RC number
+          if [ -z "$RC_TAGS" ]; then
+            RC_NUMBER=0
+          else
+            LATEST_RC_TAG=$(echo "$RC_TAGS" | tail -n 1)
+            RC_NUMBER=$(echo $LATEST_RC_TAG | sed "s/^v${BASE_VERSION}-rc\.//" | sed 's/[^0-9]*//g')
+            RC_NUMBER=$((RC_NUMBER + 1))
+          fi
+          
+          NEW_RC_VERSION="${BASE_VERSION}-rc.${RC_NUMBER}"
+          echo "New RC version: $NEW_RC_VERSION"
+          
+          # Export for next steps
+          echo "rc_version=$NEW_RC_VERSION" >> $GITHUB_OUTPUT
+          echo "rc_number=$RC_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Update package.json with RC version
+        run: |
+          RC_VERSION="${{ steps.rc-version.outputs.rc_version }}"
+          
+          # Update package.json version
+          npm version $RC_VERSION --no-git-tag-version
+          
+          echo "Updated package.json to version: $RC_VERSION"
+
+      - name: Commit and tag RC version
+        run: |
+          RC_VERSION="${{ steps.rc-version.outputs.rc_version }}"
+          
+          # Commit the version change
+          git add package.json package-lock.json
+          git commit -m "Create release candidate v$RC_VERSION"
+          
+          # Create and push tag
+          git tag "v$RC_VERSION"
+          git push origin "v$RC_VERSION"
+          
+          # Push the commit
+          git push origin main
+          
+          echo "Created and pushed RC version: v$RC_VERSION"
