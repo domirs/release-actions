@@ -16,6 +16,19 @@ jobs:
         with:
           fetch-depth: 0 # Fetch full history including tags
 
+      - name: Check branch is not main
+        run: |
+          CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
+          echo "Current branch: $CURRENT_BRANCH"
+
+          if [ "$CURRENT_BRANCH" = "main" ]; then
+            echo "❌ Error: Release candidates should not be created from the main branch."
+            echo "Please create a release branch first and run this workflow from there."
+            exit 1
+          fi
+
+          echo "✅ Branch check passed. Creating RC from branch: $CURRENT_BRANCH"
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
