@@ -1,4 +1,4 @@
-name: Create Final Release
+name: 3 - Create Final Release
 
 on:
   workflow_dispatch: # Allows manual triggering
