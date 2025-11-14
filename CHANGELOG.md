@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.7.0](https://github.com/domirs/release-actions/compare/v2.7.0-rc.0...v2.7.0) (2025-11-14)
+
 ## [2.7.0-rc.0](https://github.com/domirs/release-actions/compare/v2.6.3-rc.2...v2.7.0-rc.0) (2025-11-14)
 
 
