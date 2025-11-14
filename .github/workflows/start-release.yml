@@ -1,4 +1,4 @@
-name: Create Release Branch and Bump Version
+name: Start Release Branch and Bump Version
 
 on:
   workflow_dispatch: # Allows manual triggering

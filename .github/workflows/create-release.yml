@@ -95,27 +95,31 @@ jobs:
 
           echo "Created final release tag: v$FINAL_VERSION"
 
-      - name: Merge to main and cleanup
+      - name: Create Pull Request to main
         run: |
           CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           FINAL_VERSION="${{ steps.release-version.outputs.final_version }}"
 
-          echo "Merging $CURRENT_BRANCH into main..."
+          echo "Creating Pull Request to merge $CURRENT_BRANCH into main..."
 
-          # Switch to main branch
-          git checkout main
-          git pull origin main
+          # Create PR using GitHub CLI
+          gh pr create \
+            --title "Release v$FINAL_VERSION" \
+            --body "🚀 **Final Release v$FINAL_VERSION**
 
-          # Merge the release branch
-          git merge --no-ff $CURRENT_BRANCH -m "Merge release branch for v$FINAL_VERSION"
+          This PR contains the final release version and should be merged to complete the release process.
 
-          # Push the merge to main
-          git push origin main
+          ## Post-merge Actions
+          After merging this PR, the release branch \`$CURRENT_BRANCH\` can be safely deleted.
 
-          # Delete the release branch on the server
-          git push origin --delete $CURRENT_BRANCH
+          ---
+          *This PR was automatically created by the release workflow.*" \
+            --base main \
+            --head $CURRENT_BRANCH
 
           echo "✅ Successfully:"
-          echo "  - Merged $CURRENT_BRANCH into main"
-          echo "  - Deleted $CURRENT_BRANCH branch on server"
-          echo "  - Created final release v$FINAL_VERSION"
+          echo "  - Created Pull Request to merge $CURRENT_BRANCH into main"
+          echo "  - Created final release tag v$FINAL_VERSION"
+          echo "  - Ready for review and merge!"
+        env:
+          GH_TOKEN: ${{ github.token }}
